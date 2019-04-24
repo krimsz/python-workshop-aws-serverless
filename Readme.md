@@ -203,7 +203,7 @@ We are not going to directly use CloudFormation templates but we are going to us
 Serverless is a framework we use for the configuration and deployment. The syntax is similar to CloudFormation but it will do some things for us (such as creating intermediate resources, events...). The creation of resources and lambda functions will be splitted in different files and the resources will be referenced using **Outputs** and Importing the values when needed
 Since the environment will be shared between different users, it is needed to add a "suffix" to the resource names to avoid conflicts in the names.
 
-We will also use a serverless plugin that will build the dependencies for the lambda and package it for us. The plugin is called "serverless-python-requirements" and can be installed using the bash script "install-sls-dependencies"
+We will also use a serverless plugin that will build the dependencies for the lambda and package it for us. The plugin is called "serverless-python-requirements" and can be installed using the bash script "install-sls-dependencies". This plugin has a hard limitation, requires a requirements.txt at the same level of the serverelss.yml file, that's the reason why multiple requirements.txt will be found along the repo
 
 ### Proposed improvements:
 For those teams that finish with the implementation within the time of the workshop. The possible improvements are marked in the diagram with a blue background and could be (not limited to only these, if you think of any other thing feel free to do so):
