@@ -1,0 +1,56 @@
+service: ${env:suffix}-data-consumer
+Description: "Service to store movie information"
+plugins:
+  - serverless-python-requirements
+package:
+  exclude:
+    - ../../../**
+  include:
+    - ../../../lambda_src/common_deps/**
+    - ../../../lambda_src/insert_to_db_consumer/**
+custom:
+  pythonRequirements:
+    dockerizePip: true
+provider:
+  name: aws
+  runtime: python3.7
+  region: "${env:AWS_DEFAULT_REGION}"
+  timeout: 300
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:BatchGet*"
+        - "dynamodb:DescribeStream"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Get*"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "dynamodb:BatchWrite*"
+        - "dynamodb:CreateTable"
+        - "dynamodb:Delete*"
+        - "dynamodb:Update*"
+        - "dynamodb:PutItem"
+      Resource:
+        Fn::ImportValue: MoviesTableArn-${env:suffix}
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "arn:aws:logs:*:*:*"
+
+functions:
+  data-consumer:
+    handler: lambda_src/insert_to_db_consumer/handler.handle
+    MemorySize: 128
+    Timeout: 5
+    environment:
+      LOG_LEVEL: DEBUG
+      MOVIES_TABLE_NAME:
+        Fn::ImportValue: MoviesTableName-${env:suffix}
+    events:
+    - stream:
+        type: kinesis
+        arn:
+          Fn::ImportValue: KinesisDataProcessingArn-${env:suffix}

@@ -1,0 +1,63 @@
+service: ${env:suffix}-resources-data-pipeline
+Description: "Definition of common resources"
+provider:
+  name: aws
+  runtime: python3.6
+  region: "${env:AWS_DEFAULT_REGION}"
+
+resources:
+  Resources:
+    KinesisDataProcessing:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: data-processing-stream-${env:suffix}
+        ShardCount: 1
+    KinesisErrorProcessing:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: error-processing-stream-${env:suffix}
+        ShardCount: 1
+    MoviesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: movie-${env:suffix}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+  Outputs:
+    MoviesTableName:
+      Value:
+        Ref: MoviesTable
+      Export:
+        Name: MoviesTableName-${env:suffix}
+    MoviesTableArn:
+      Value:
+        Fn::GetAtt: [MoviesTable,"Arn"]
+      Export:
+        Name: MoviesTableArn-${env:suffix}
+    KinesisDataProcessingArn:
+      Value:
+        Fn::GetAtt: [KinesisDataProcessing, "Arn"]
+      Export:
+        Name: KinesisDataProcessingArn-${env:suffix}
+    KinesisDataProcessingName:
+      Value:
+        Ref: KinesisDataProcessing
+      Export:
+        Name: KinesisDataProcessingName-${env:suffix}
+    KinesisErrorProcessingArn:
+      Value:
+        Fn::GetAtt: [KinesisErrorProcessing, "Arn"]
+      Export:
+        Name: KinesisErrorProcessingArn-${env:suffix}
+    KinesisErrorProcessingName:
+      Value:
+        Ref: KinesisErrorProcessing
+      Export:
+        Name: KinesisErrorProcessingName-${env:suffix}

@@ -1,0 +1,34 @@
+service: ${env:suffix}-error-consumer
+Description: "Service to log error information"
+package:
+  exclude:
+    - ../../../**
+  include:
+    - ../../../lambda_src/common_deps/**
+    - ../../../lambda_src/error_consumer/**
+provider:
+  name: aws
+  runtime: python3.7
+  region: "${env:AWS_DEFAULT_REGION}"
+  timeout: 300
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "arn:aws:logs:*:*:*"
+
+functions:
+  error-consumer:
+    handler: lambda_src/error_consumer/handler.handle
+    MemorySize: 128
+    Timeout: 5
+    environment:
+      LOG_LEVEL: DEBUG
+    events:
+    - stream:
+        type: kinesis
+        arn:
+          Fn::ImportValue: KinesisErrorProcessingArn-${env:suffix}
